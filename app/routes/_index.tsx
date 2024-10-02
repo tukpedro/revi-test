@@ -55,6 +55,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   const openai = new OpenAI({
+    timeout: 20000,
     apiKey: process.env.OPENAI_API_KEY,
   });
 
@@ -95,8 +96,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function Index() {
   const { rooms } = useLoaderData<typeof loader>();
   const lastResult = useActionData<typeof action>();
-  const [selectedMonsters, setSelectedMonsters] = useState<string[]>([]);
-  const navigate = useNavigate();
   const [form, fields] = useForm({
     lastResult,
     onValidate({ formData }) {
@@ -272,7 +271,6 @@ export default function Index() {
                 <Card
                   className={cn(
                     "cursor-pointer",
-                    `${selectedMonsters.includes(id) ? "bg-blue-500" : ""}`,
                   )}
                   key={id}
                 >
