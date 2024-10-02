@@ -19,6 +19,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
   Form,
+  Link,
   useActionData,
   useLoaderData,
   useNavigate,
@@ -273,6 +274,7 @@ export default function Index() {
         <div className="bg-card p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold mb-4">Salas criadas</h2>
+            <Link to="/list">lista</Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {rooms.map(({ label, id, image }) => (
