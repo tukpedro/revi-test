@@ -27,6 +27,8 @@
 		"framer-motion": "^11.5.4",
 		"isbot": "^4.1.0",
 		"lucide-react": "^0.439.0",
+		"markdown-to-text": "^0.1.1",
+		"openai": "^4.67.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"tailwind-merge": "^2.5.2",

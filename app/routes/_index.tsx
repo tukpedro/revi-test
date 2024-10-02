@@ -1,5 +1,6 @@
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { v4 as uuidv4 } from "uuid";
+import OpenAI from "openai";
 
 export const meta: MetaFunction = () => {
   return [
@@ -28,17 +29,16 @@ const roomSchema = z.object({
   id: z.string().uuid(),
   label: z.string().min(1),
   spaceId: z.number(),
-  neighborhood: z.string(),
   city: z.string(),
   tier: z.string(),
-  capacity: z.number(),
+  // capacity: z.number(),
   size: z.string(),
   credits: z.number(),
   status: z.number(),
   image: z.string().min(1),
+  lat: z.string(),
+  long: z.string(),
 });
-
-export const monstersSchema = z.array(roomSchema);
 
 export var rooms: any[] = [];
 
@@ -54,7 +54,40 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return submission.reply();
   }
 
-  rooms.push(submission.value);
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const { image } = submission.value;
+
+  const { choices } = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "user",
+        content: [
+          { 
+            type: "text", 
+            text: "Você é um vendedor especializado em escritórios privativos e está encarregado de cadastrar salas em uma plataforma de anúncios. Seu objetivo é gerar uma descrição detalhada da sala, utilizando as informações fornecidas em um JSON e nas imagens associadas ao espaço. A descrição deve ser atraente para potenciais clientes e fornecer uma visão clara do que a sala oferece, sem utilizar nenhuma formatação especial (como listas, negrito, itálico, etc.). Descreva o tamanho, capacidade e configuração da sala, comparando se a capacidade mencionada no JSON condiz com as imagens. Indique se o espaço pode acomodar mais pessoas do que o especificado e a partir da imagem. Utilize as coordenadas de latitude e longitude para listar pontos de referência próximos, como estações de metrô, paradas de ônibus, comércios, e a distância até esses locais. Baseie-se nas imagens fornecidas para descrever as características visuais do espaço, como iluminação, disposição do mobiliário, tipo de piso e equipamentos disponíveis (ex.: ar-condicionado, projetores, TVs, armários, decorações, etc). Agrupe as descrições de forma coerente e conectada, sempre considerando que todas as imagens são do mesmo espaço. Avalie o nível de silêncio e privacidade do ambiente com base na estrutura visível nas imagens e mencione facilidades de acesso, como elevadores ou proximidade com transporte público a partir dos pontos de referência. Use um tom profissional e informativo, destacando os principais atrativos da sala, sem recorrer a listas ou qualquer tipo de formatação textual. O resultado esperado é um texto contínuo, sem formatação, que descreva de maneira clara e envolvente as características da sala, com detalhamento geográfico preciso, destacando os pontos de referência próximos e suas distâncias. A descrição das imagens deve ser agrupada logicamente, sem listas ou tópicos, e deve incluir a avaliação cuidadosa das amenidades visíveis, destacando os benefícios práticos da sala. Não se espera que o texto tenha qualquer tipo de formatação, como negrito, listas ou tópicos, ou que seja curto ou sem detalhamento suficiente, além de não omitir aspectos importantes como localização geográfica, pontos de referência, capacidade da sala e análise das imagens"
+          },
+          {
+            type: "text",
+            text: JSON.stringify(submission.value),          
+          },
+          { 
+            type: "image_url",
+            image_url: {
+              "url": image,
+            },
+          },
+        ],
+      },
+    ],
+  })
+
+  console.log(choices[0])
+
+  rooms.push({...submission.value, description: choices[0].message.content});
 
   return submission.reply();
 }
@@ -109,17 +142,6 @@ export default function Index() {
               <span className="text-red-500">{fields.spaceId.errors}</span>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="neighborhood">Neighborhood</Label>
-              <Input
-                key={fields.neighborhood.key}
-                name={fields.neighborhood.name}
-                defaultValue={fields.neighborhood.initialValue}
-                id="neighborhood"
-                placeholder="Preencha com o bairro da sala"
-              />
-              <span className="text-red-500">{fields.neighborhood.errors}</span>
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="city">City</Label>
               <Input
                 key={fields.city.key}
@@ -141,7 +163,7 @@ export default function Index() {
               />
               <span className="text-red-500">{fields.tier.errors}</span>
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="capacity">Capacity</Label>
               <Input
                 key={fields.capacity.key}
@@ -152,7 +174,7 @@ export default function Index() {
                 placeholder="Preencha com a capacidade da sala"
               />
               <span className="text-red-500">{fields.capacity.errors}</span>
-            </div>
+            </div> */}
             <div className="space-y-2">
               <Label htmlFor="size">Size</Label>
               <Input
@@ -187,6 +209,30 @@ export default function Index() {
                 placeholder="Preencha com o status da sala"
               />
               <span className="text-red-500">{fields.status.errors}</span>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lat">Lat</Label>
+              <Input
+                key={fields.lat.key}
+                name={fields.lat.name}
+                defaultValue={fields.lat.initialValue}
+                id="status"
+                type="number"
+                placeholder="Preencha com a latitude da sala"
+              />
+              <span className="text-red-500">{fields.lat.errors}</span>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="long">Long</Label>
+              <Input
+                key={fields.long.key}
+                name={fields.long.name}
+                defaultValue={fields.long.initialValue}
+                id="status"
+                type="number"
+                placeholder="Preencha com a longitude da sala"
+              />
+              <span className="text-red-500">{fields.long.errors}</span>
             </div>
             <div className="space-y-2">
               <Label htmlFor="image">Image URL</Label>

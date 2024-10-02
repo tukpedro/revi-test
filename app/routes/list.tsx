@@ -20,38 +20,15 @@ import {
     HoverCardTrigger,
   } from "~/components/ui/hover-card"
   
+import { rooms } from "./_index"
+import OpenAI from "openai"
 
 const promptSchema = z.object({
     prompt: z.string().min(1),
 });
 
 export const loader = async () => {
-    const room = [{
-        id: 1,
-        name: "Room 1",
-        neighboorhood: "Neighborhood 1",
-        city: "City 1",
-        image: "/placeholder.svg"
-    }, {
-        id: 2,
-        name: "Room 2",
-        neighboorhood: "Neighborhood 1",
-        city: "City 1",
-        image: "/placeholder.svg"
-    },{
-        id: 3,
-        name: "Room 3",
-        neighboorhood: "Neighborhood 1",
-        city: "City 1",
-        image: "/placeholder.svg"
-    },{
-        id: 4,
-        name: "Room 4",
-        neighboorhood: "Neighborhood 1",
-        city: "City 1",
-        image: "/placeholder.svg"
-    }]
-    return { room }
+    return { rooms }
 }
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -66,21 +43,58 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         filteredRooms: []
     }
   }
-    const responses = ["lorem", "ipsum", "dolor", "sit", "amet"]
 
-    const filteredRooms = [{
-        id: 1,
-        name: "Filtered Room 1",
-        neighboorhood: "Neighborhood 1",
-        city: "City 1",
-        image: "/placeholder.svg"
-    }]
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const descriptions: any[] = rooms.map((room) => {
+    return `id: ${room.id} , description: ${room.description}`
+  })
+
+  const { choices } = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+        {
+          role: "user",
+          content: [
+            { 
+              type: "text", 
+              text: "Compare as descrições das salas e retorne os ids das salas que mais se assemelham ao prompt, ordenados por ordem de semelhança: " + submission.value.prompt
+            },
+            {
+                type: "text",
+                text: "Descrições das salas: " + descriptions.join(", ")
+            },
+            { 
+                type: "text", 
+                text: "Responda retornando somente os ids das salas separados por virgulas, se você não retornar seguindo o formato sera penalizado"
+            },
+          ],
+        },
+      ],
+  })
+
+  console.log(choices)
+
+  const filteredRoomIds = choices[0].message?.content?.split(",").map((id: string) => id.trim())
+
+  const filteredRooms = filteredRoomIds?.map((id: string) => {
+    return rooms.find((room) => {
+      return room.id === id
+    })
+  })
+
+  console.log('ids',filteredRoomIds)
+  console.log('filtrado',filteredRooms)
+
+    const responses = ["lorem", "ipsum", "dolor", "sit", "amet"]
     
-    return { responses, filteredRooms , submission: submission.reply()}
+    return { responses, filteredRooms: filteredRooms || []  , submission: submission.reply()}
 }
 
 export default function List() {
-    const { room } = useLoaderData<typeof loader>()
+    const { rooms } = useLoaderData<typeof loader>()
     const actionData = useActionData<typeof action>()
   
     const [form, fields] = useForm({
@@ -166,7 +180,7 @@ export default function List() {
                             </TableRow>
                         ))
                     ) : (
-                            room.map((room) => (
+                            rooms.map((room: any) => (
                             <TableRow key={room.id}>
                                 <TableCell>
                                     <HoverCard>
