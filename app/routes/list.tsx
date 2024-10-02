@@ -157,21 +157,24 @@ export default function List() {
                             <TableRow key={room.id}>
                                 <TableCell>
                                     <HoverCard>
-                                        <HoverCardTrigger>
-                                            <img src={room.image} alt={room.name} className="w-24 h-12" />  
-                                        </HoverCardTrigger>
-                                        <HoverCardContent className="w-[550px]">
-                                            <div className="flex flex-col gap-2">
-                                                <img src={room.image} alt={room.name} className="w-[500px] h-[300px]" />
-                                                <h6 className="font-semibold">Descrição</h6>
-                                                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Praesentium atque quod ducimus quo, soluta fuga? In, tenetur nemo. Ea magnam natus perferendis modi nesciunt vel reiciendis voluptatibus dolorem fuga dicta!</p>
+                                    <HoverCardTrigger>
+                                    <img src={room.image} alt={room.label} className="w-24 h-12" />
+                                    </HoverCardTrigger>
+                                    <HoverCardContent className="w-[510px] h-[500px]">
+                                        <div className="flex flex-col gap-2 h-full">
+
+                                            <img src={room.image} alt={room.label} className="w-[500px] h-[300px]" />
+                                            <h6 className="font-semibold">Descrição</h6>
+                                       <ScrollArea className="h-[600px]">
+                                            <p>{room.description}</p>
+                                        </ScrollArea>
                                             </div>
-                                        </HoverCardContent>
+                                    </HoverCardContent>
                                     </HoverCard>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-2">
-                                        <h6>{room.name}</h6>
+                                        <h6>{room.label}</h6>
                                         <p>{room.id}</p>
                                     </div>
                                 </TableCell>
@@ -185,20 +188,23 @@ export default function List() {
                                 <TableCell>
                                     <HoverCard>
                                     <HoverCardTrigger>
-                                    <img src={room.image} alt={room.name} className="w-24 h-12" />
+                                    <img src={room.image} alt={room.label} className="w-24 h-12" />
                                     </HoverCardTrigger>
-                                    <HoverCardContent className="w-[510px]">
-                                        <div className="flex flex-col gap-2">
-                                            <img src={room.image} alt={room.name} className="w-[500px] h-[300px]" />
+                                    <HoverCardContent className="w-[510px] h-[500px]">
+                                        <div className="flex flex-col gap-2 h-full">
+
+                                            <img src={room.image} alt={room.label} className="w-[500px] h-[300px]" />
                                             <h6 className="font-semibold">Descrição</h6>
-                                            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Praesentium atque quod ducimus quo, soluta fuga? In, tenetur nemo. Ea magnam natus perferendis modi nesciunt vel reiciendis voluptatibus dolorem fuga dicta!</p>
-                                        </div>
+                                       <ScrollArea className="h-[600px]">
+                                            <p>{room.description}</p>
+                                        </ScrollArea>
+                                            </div>
                                     </HoverCardContent>
                                     </HoverCard>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-2 justify-center">
-                                        <h6>{room.name}</h6>
+                                        <h6>{room.label}</h6>
                                         <p className="text-gray-500">{room.id}</p>
                                     </div>
                                 </TableCell>
