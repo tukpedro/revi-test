@@ -104,6 +104,18 @@ export default function Index() {
     },
     shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
+    defaultValue: {
+      label: "sala 1",
+      spaceId: "1",
+      city: "sao paulo",
+      tier: "1",
+      size: "2",
+      credits: "1",
+      status: "1",
+      image: "https://d1y4va1nna2r1p.cloudfront.net/spaces/7313ef2d-d0ae-4cdc-8f8a-496e1dc83198.jpeg",
+      lat: "-23.556290568479188",
+      long: "-46.66699512214109",
+    }
   });
 
   return (
