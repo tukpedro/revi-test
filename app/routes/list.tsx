@@ -65,14 +65,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           {
             type: "text",
             text:
-              "Compare as descrições das salas e retorne os ids das salas que mais se assemelham ao prompt, ordenados por ordem de semelhança: " +
+              "Compare as descrições das salas e retorne os ids das salas que mais que tenham as descrições a seguir: " +
               submission.value.prompt,
           },
           {
             type: "text",
             text: "Descrições das salas: " + descriptions.join(", "),
           },
-          {
+          { 
             type: "text",
             text: "Responda retornando somente os ids das salas separados por virgulas, se você não retornar seguindo o formato sera penalizado",
           },
