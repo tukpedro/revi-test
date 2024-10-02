@@ -2,6 +2,10 @@ import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { v4 as uuidv4 } from "uuid";
 import OpenAI from "openai";
 
+
+
+
+
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
