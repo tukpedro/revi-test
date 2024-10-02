@@ -39,6 +39,5 @@ export default function App() {
 			nProgress.done()
 		}
 	}, [transition.state])
-  console.log(transition.state)
   return <Outlet />;
 }

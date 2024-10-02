@@ -172,8 +172,13 @@ export default function List() {
               <TableRow>
                 <TableHead>Fotos</TableHead>
                 <TableHead>Nome</TableHead>
-                <TableHead>Bairro</TableHead>
                 <TableHead>Cidade</TableHead>
+                <TableHead>Tamanho</TableHead>
+                <TableHead>Creditos</TableHead>
+                <TableHead>Tier</TableHead>
+                <TableHead>Latitude</TableHead>
+                <TableHead>Longitude</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -210,8 +215,13 @@ export default function List() {
                           <p>{room.id}</p>
                         </div>
                       </TableCell>
-                      <TableCell>{room.neighboorhood}</TableCell>
                       <TableCell>{room.city}</TableCell>
+                      <TableCell>{room.size}</TableCell>
+                      <TableCell>{room.credits}</TableCell>
+                      <TableCell>{room.tier}</TableCell>
+                      <TableCell>{room.lat}</TableCell>
+                      <TableCell>{room.long}</TableCell>
+                      <TableCell>{room.status}</TableCell>
                     </TableRow>
                   ))
                 : rooms.map((room: any) => (
@@ -246,8 +256,13 @@ export default function List() {
                           <p className="text-gray-500">{room.id}</p>
                         </div>
                       </TableCell>
-                      <TableCell>{room.neighboorhood}</TableCell>
                       <TableCell>{room.city}</TableCell>
+                      <TableCell>{room.size}</TableCell>
+                      <TableCell>{room.credits}</TableCell>
+                      <TableCell>{room.tier}</TableCell>
+                      <TableCell>{room.lat}</TableCell>
+                      <TableCell>{room.long}</TableCell>
+                      <TableCell>{room.status}</TableCell>
                     </TableRow>
                   ))}
             </TableBody>
