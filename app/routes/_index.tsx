@@ -1,4 +1,4 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { v4 as uuidv4 } from "uuid";
 
 export const meta: MetaFunction = () => {
@@ -13,7 +13,6 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
-  ClientActionFunctionArgs,
   Form,
   useActionData,
   useLoaderData,
@@ -24,96 +23,61 @@ import { z } from "zod";
 import { useForm } from "@conform-to/react";
 import { useState } from "react";
 import { cn } from "~/lib/utils";
-import { Trash } from "lucide-react";
 
-const monsterSchema = z.object({
+const roomSchema = z.object({
   id: z.string().uuid(),
-  name: z.string().min(1),
-  attack: z.number().min(1),
-  defense: z.number().min(1),
-  speed: z.number().min(1),
-  hp: z.number().min(1),
+  label: z.string().min(1),
+  spaceId: z.number(),
+  neighborhood: z.string(),
+  city: z.string(),
+  tier: z.string(),
+  capacity: z.number(),
+  size: z.string(),
+  credits: z.number(),
+  status: z.number(),
   image: z.string().min(1),
 });
 
-export const monstersSchema = z.array(monsterSchema);
+export const monstersSchema = z.array(roomSchema);
 
-export const clientLoader = () => {
-  const monsters = JSON.parse(sessionStorage.getItem("monsters") || "[]");
-  const parsed = monstersSchema.parse(monsters);
-  return { monsters: parsed };
-};
+export var rooms: any[] = [];
 
-const deleteMonster = async (args: ClientActionFunctionArgs) => {
-  const { request } = args;
-  const formData = await request.clone().formData();
-  const id = formData.get("id");
-  if (!id) return {};
-  const monsters = monstersSchema.parse(
-    JSON.parse(sessionStorage.getItem("monsters") || "[]"),
-  );
-  monsters.splice(monsters.findIndex((m) => m.id === id), 1);
-  sessionStorage.setItem("monsters", JSON.stringify(monsters));
-  return {};
-};
+export const loader = () => {
+  return {rooms};
+}
 
-const createMonster = async (args: ClientActionFunctionArgs) => {
-  const { request } = args;
-
-  const formData = await request.clone().formData();
-  const submission = parseWithZod(formData, { schema: monsterSchema });
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const submission = parseWithZod(formData, { schema: roomSchema });
 
   if (submission.status !== "success") {
-    return (submission.reply());
+    return submission.reply();
   }
-  const monsters = JSON.parse(sessionStorage.getItem("monsters") || "[]");
-  monsters.push(submission.value);
-  sessionStorage.setItem("monsters", JSON.stringify(monsters));
 
-  return {};
-};
+  rooms.push(submission.value);
 
-export const clientAction = async (
-  args: ClientActionFunctionArgs,
-) => {
-  const { request } = args;
-  if (request.method === "DELETE") {
-    return await deleteMonster(args);
-  }
-  return await createMonster(args);
-};
+  return submission.reply();
+}
 
 export default function Index() {
-  const { monsters } = useLoaderData<typeof clientLoader>();
-  const lastResult = useActionData<typeof clientAction>();
+  const { rooms } = useLoaderData<typeof loader>();
+  const lastResult = useActionData<typeof action>();
   const [selectedMonsters, setSelectedMonsters] = useState<string[]>([]);
   const navigate = useNavigate();
   const [form, fields] = useForm({
     lastResult,
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: monsterSchema });
+      return parseWithZod(formData, { schema: roomSchema });
     },
     shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
   });
 
-  const selectMonstersToFight = (monsterId: string) => {
-    if (selectedMonsters.includes(monsterId)) {
-      setSelectedMonsters(selectedMonsters.filter((m) => m !== monsterId));
-      return;
-    }
-    if (selectedMonsters.length === 2) {
-      alert("You can only select 2 monsters to fight");
-      return;
-    }
-    setSelectedMonsters([...selectedMonsters, monsterId]);
-  };
-
   return (
     <div className="container mx-auto max-w-4xl py-12">
       <div className="grid gap-8">
         <div className="bg-card p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-4">Create Monster</h1>
+          <h1 className="text-2xl font-bold mb-4">Criar Sala</h1>
           <Form
             method="post"
             id={form.id}
@@ -123,63 +87,106 @@ export default function Index() {
           >
             <input type="hidden" name="id" value={uuidv4()} />
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="label">Label</Label>
               <Input
                 id="name"
-                key={fields.name.key}
-                name={fields.name.name}
-                defaultValue={fields.name.initialValue}
-                placeholder="Enter monster name"
+                key={fields.label.key}
+                name={fields.label.name}
+                defaultValue={fields.label.initialValue}
+                placeholder="Preencha com o nome da sala"
               />
-              <span className="text-red-500">{fields.name.errors}</span>
+              <span className="text-red-500">{fields.label.errors}</span>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="attack">Attack</Label>
+              <Label htmlFor="spaceId">SpaceId</Label>
               <Input
-                key={fields.attack.key}
-                name={fields.attack.name}
-                defaultValue={fields.attack.initialValue}
-                id="attack"
-                type="number"
-                placeholder="Enter attack value"
+                id="name"
+                key={fields.spaceId.key}
+                name={fields.spaceId.name}
+                defaultValue={fields.spaceId.initialValue}
+                placeholder="Preencha com Id do espaço"
               />
-              <span className="text-red-500">{fields.attack.errors}</span>
+              <span className="text-red-500">{fields.spaceId.errors}</span>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="defense">Defense</Label>
+              <Label htmlFor="neighborhood">Neighborhood</Label>
               <Input
-                key={fields.defense.key}
-                name={fields.defense.name}
-                defaultValue={fields.defense.initialValue}
-                id="defense"
-                type="number"
-                placeholder="Enter defense value"
+                key={fields.neighborhood.key}
+                name={fields.neighborhood.name}
+                defaultValue={fields.neighborhood.initialValue}
+                id="neighborhood"
+                placeholder="Preencha com o bairro da sala"
               />
-              <span className="text-red-500">{fields.defense.errors}</span>
+              <span className="text-red-500">{fields.neighborhood.errors}</span>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="speed">Speed</Label>
+              <Label htmlFor="city">City</Label>
               <Input
-                key={fields.speed.key}
-                name={fields.speed.name}
-                defaultValue={fields.speed.initialValue}
-                id="speed"
-                type="number"
-                placeholder="Enter speed value"
+                key={fields.city.key}
+                name={fields.city.name}
+                defaultValue={fields.city.initialValue}
+                id="city"
+                placeholder="Preencha com a cidade da sala"
               />
-              <span className="text-red-500">{fields.speed.errors}</span>
+              <span className="text-red-500">{fields.city.errors}</span>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="hp">HP</Label>
+              <Label htmlFor="tier">Tier</Label>
               <Input
-                key={fields.hp.key}
-                name={fields.hp.name}
-                defaultValue={fields.hp.initialValue}
-                id="hp"
-                type="number"
-                placeholder="Enter HP value"
+                key={fields.tier.key}
+                name={fields.tier.name}
+                defaultValue={fields.tier.initialValue}
+                id="tier"
+                placeholder="Preencha com Tier"
               />
-              <span className="text-red-500">{fields.hp.errors}</span>
+              <span className="text-red-500">{fields.tier.errors}</span>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="capacity">Capacity</Label>
+              <Input
+                key={fields.capacity.key}
+                name={fields.capacity.name}
+                defaultValue={fields.capacity.initialValue}
+                id="capacity"
+                type="number"
+                placeholder="Preencha com a capacidade da sala"
+              />
+              <span className="text-red-500">{fields.capacity.errors}</span>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="size">Size</Label>
+              <Input
+                key={fields.size.key}
+                name={fields.size.name}
+                defaultValue={fields.size.initialValue}
+                id="size"
+                placeholder="Preencha com o tamanho da sala"
+              />
+              <span className="text-red-500">{fields.size.errors}</span>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="credits">Credits</Label>
+              <Input
+                key={fields.credits.key}
+                name={fields.credits.name}
+                defaultValue={fields.credits.initialValue}
+                id="credits"
+                type="number"
+                placeholder="Preencha com a quantidade de Creditos"
+              />
+              <span className="text-red-500">{fields.credits.errors}</span>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Input
+                key={fields.status.key}
+                name={fields.status.name}
+                defaultValue={fields.status.initialValue}
+                id="status"
+                type="number"
+                placeholder="Preencha com o status da sala"
+              />
+              <span className="text-red-500">{fields.status.errors}</span>
             </div>
             <div className="space-y-2">
               <Label htmlFor="image">Image URL</Label>
@@ -188,42 +195,28 @@ export default function Index() {
                 name={fields.image.name}
                 defaultValue={fields.image.initialValue}
                 id="image"
-                placeholder="Enter image URL"
+                placeholder="Preencha com a URL da imagem"
               />
               <span className="text-red-500">{fields.image.errors}</span>
             </div>
             <div className="mt-6 flex">
-              <Button type="submit">Save Monster</Button>
+              <Button type="submit">Salvar sala</Button>
             </div>
           </Form>
         </div>
         <div className="bg-card p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold mb-4">Created Monsters</h2>
-            <Button
-              type="button"
-              disabled={selectedMonsters.length !== 2}
-              onClick={() =>
-                navigate(`/fight?monsters${
-                  selectedMonsters.length > 0
-                    ? `=${selectedMonsters.join(",")}`
-                    : ""
-                }`)}
-            >
-              Fight
-            </Button>
+            <h2 className="text-xl font-bold mb-4">Salas criadas</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {monsters.map(({ name, attack, defense, speed, hp, image, id }) => (
+            {rooms.map(({ label, id, image }) => (
               <Card key={id} className="space-y-2">
                 <Card
                   className={cn(
                     "cursor-pointer",
                     `${selectedMonsters.includes(id) ? "bg-blue-500" : ""}`,
                   )}
-                  key={name}
-                  onClick={() =>
-                    selectMonstersToFight(id)}
+                  key={id}
                 >
                   <img
                     src={image}
@@ -233,9 +226,9 @@ export default function Index() {
                     className="rounded-t-lg object-cover w-full aspect-square"
                   />
                   <CardContent className="p-4">
-                    <h3 className="text-lg font-bold">{name}</h3>
+                    <h3 className="text-lg font-bold">{label}</h3>
                     <div className="grid grid-cols-2 gap-2 mt-2">
-                      <div>
+                      {/* <div>
                         <span className="font-medium">Attack:</span> {attack}
                       </div>
                       <div>
@@ -246,17 +239,10 @@ export default function Index() {
                       </div>
                       <div>
                         <span className="font-medium">HP:</span> {hp}
-                      </div>
+                      </div> */}
                     </div>
                   </CardContent>
                 </Card>
-
-                <Form method="delete">
-                  <input type="hidden" name="id" value={id} />
-                  <button type="submit">
-                    <Trash className="text-red-500 hover:text-red-700" />
-                  </button>
-                </Form>
               </Card>
             ))}
           </div>
