@@ -23,6 +23,11 @@ import {
 import { rooms } from "./_index";
 import OpenAI from "openai";
 
+
+export const config = {
+  maxDuration: 60,
+};
+
 const promptSchema = z.object({
   prompt: z.string().min(1),
 });

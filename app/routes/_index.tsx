@@ -40,6 +40,11 @@ const roomSchema = z.object({
   long: z.string(),
 });
 
+
+export const config = {
+  maxDuration: 60,
+};
+
 export var rooms: any[] = [];
 
 export const loader = () => {
