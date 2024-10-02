@@ -4,14 +4,28 @@ import { ActionFunctionArgs } from "@remix-run/node"
 import { Form, useActionData, useLoaderData } from "@remix-run/react"
 import { z } from "zod"
 import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
 import { ScrollArea } from "~/components/ui/scroll-area"
+import { Textarea } from "~/components/ui/textarea"
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "~/components/ui/table"
+  import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+  } from "~/components/ui/hover-card"
+  
 
 const promptSchema = z.object({
     prompt: z.string().min(1),
 });
 
-export const loader = async ({ request }: ActionFunctionArgs) => {
+export const loader = async () => {
     const room = [{
         id: 1,
         name: "Room 1",
@@ -89,11 +103,11 @@ export default function List() {
         <aside className="w-1/3 flex flex-col gap-4 border-r h-full">
             <h5 className="border-b p-2">Seu prompt</h5>
             <Form method="post" id={form.id} onSubmit={form.onSubmit} noValidate className="flex flex-col gap-4 p-2">
-                <Input 
+                <Textarea 
                 name={fields.prompt.name}
                 key={fields.prompt.key}
                 defaultValue={fields.prompt.initialValue}
-                type="text" placeholder="Digite seu prompt" />
+                placeholder="Descreva as características da sala privativa que você procura (ex.: 'Sala para 10 pessoas em São Paulo com estacionamento')." />
                 <span className="text-red-500">{fields.prompt.errors}</span>
                 <Button type="submit">Enviar</Button>
             </Form>
@@ -114,34 +128,76 @@ export default function List() {
             <div className="border-b">
                 <h5 className="p-2">Resultados</h5>
             </div>
-            <ul className="grid grid-cols-4 gap-4 p-2">
-                {actionData?.filteredRooms && actionData?.filteredRooms.length > 0 ? (
-                    actionData?.filteredRooms.map((room) => (
-                        <li key={room.id} className="flex flex-col gap-2">
-                            <img src={room.image} alt={room.name} className="w-80 h-48" />
-                            <h6>{room.name}</h6>
-                            <div className="flex flex-row gap-2 text-gray-500">
-                                <p>{room.neighboorhood}</p>
-                                <p>{room.city}</p>
-                            </div>
-                        </li>
-                    ))
-                ) : (
-                    room.map((room) => (
-                        <li key={room.id} className="flex flex-col gap-2">
-                            <img src={room.image} alt={room.name} className="w-80 h-48" />
-                            <h6>{room.name}</h6>
-                            <div className="flex flex-row gap-4 text-gray-500">
-                                <p>{room.neighboorhood}</p>
-                                <p>{room.city}</p>
-                            </div>
-                        </li>
-                    ))
-                )}
-            </ul>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Fotos</TableHead>
+                        <TableHead>Nome</TableHead>
+                        <TableHead>Bairro</TableHead>
+                        <TableHead>Cidade</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {actionData?.filteredRooms && actionData?.filteredRooms.length > 0 ? (
+                        actionData?.filteredRooms.map((room) => (
+                            <TableRow key={room.id}>
+                                <TableCell>
+                                    <HoverCard>
+                                        <HoverCardTrigger>
+                                            <img src={room.image} alt={room.name} className="w-24 h-12" />  
+                                        </HoverCardTrigger>
+                                        <HoverCardContent className="w-[550px]">
+                                            <div className="flex flex-col gap-2">
+                                                <img src={room.image} alt={room.name} className="w-[500px] h-[300px]" />
+                                                <h6 className="font-semibold">Descrição</h6>
+                                                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Praesentium atque quod ducimus quo, soluta fuga? In, tenetur nemo. Ea magnam natus perferendis modi nesciunt vel reiciendis voluptatibus dolorem fuga dicta!</p>
+                                            </div>
+                                        </HoverCardContent>
+                                    </HoverCard>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col gap-2">
+                                        <h6>{room.name}</h6>
+                                        <p>{room.id}</p>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{room.neighboorhood}</TableCell>
+                                <TableCell>{room.city}</TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                            room.map((room) => (
+                            <TableRow key={room.id}>
+                                <TableCell>
+                                    <HoverCard>
+                                    <HoverCardTrigger>
+                                    <img src={room.image} alt={room.name} className="w-24 h-12" />
+                                    </HoverCardTrigger>
+                                    <HoverCardContent className="w-[510px]">
+                                        <div className="flex flex-col gap-2">
+                                            <img src={room.image} alt={room.name} className="w-[500px] h-[300px]" />
+                                            <h6 className="font-semibold">Descrição</h6>
+                                            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Praesentium atque quod ducimus quo, soluta fuga? In, tenetur nemo. Ea magnam natus perferendis modi nesciunt vel reiciendis voluptatibus dolorem fuga dicta!</p>
+                                        </div>
+                                    </HoverCardContent>
+                                    </HoverCard>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col gap-2 justify-center">
+                                        <h6>{room.name}</h6>
+                                        <p className="text-gray-500">{room.id}</p>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{room.neighboorhood}</TableCell>
+                                <TableCell>{room.city}</TableCell>
+                            </TableRow>
+                        ))
+                    )
+                    }
+                </TableBody>
+            </Table>
         </main>
     </section>
 </div>
-
     )
 }
